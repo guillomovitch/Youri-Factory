@@ -1,0 +1,29 @@
+Youri::Factory
+--------------
+
+Factory methods
+
+Description
+-----------
+YOURI stands for "Youri Offers an Upload & Repository Infrastucture". It aims
+to build tools making management of a coherent set of packages easier.
+
+This class provides factory methods for dynamically creating instances.
+
+Installation
+------------
+To install, just use:
+perl Makefile.PL
+make
+make test
+
+Copyright and License
+---------------------
+Copyright (C) 2008, YOURI project
+
+This program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+Authors
+-------
+Guillaume Rousse <guillomovitch@zarb.org>,
