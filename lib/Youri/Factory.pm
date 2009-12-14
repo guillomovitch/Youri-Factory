@@ -11,9 +11,8 @@ This class provides factory methods for dynamically creating instances.
 
 =cut
 
-use Moose;
-use MooseX::Method;
-use Youri::Types;
+use Params::Validate qw/:all/;
+use UNIVERSAL::require;
 use Youri::Error::WrongClass;
 use version; our $VERSION = qv('0.1.0');
 
@@ -24,16 +23,25 @@ implements given interface.
 
 =cut
 
-method create => positional (
-    { isa => 'MyClassName', required => 1 },
-    { isa => 'MyClassName', required => 1 },
-    { isa => 'HashRef',     required => 0 },
-) => sub {
+sub create {
+    validate_pos(@_,
+        1,
+        {
+            type => SCALAR,
+            callbacks => {
+                'class name' => sub { eval { $_[0]->require() } }
+            }
+        },
+        {
+            type => SCALAR,
+            callbacks => {
+                'class name' => sub { eval { $_[0]->require() } },
+                'subclass'   => sub { $_[0]->isa($_[1]->[1]) }
+            }
+        },
+        { type => HASHREF, optional => 1 }
+    );
     my ($self, $interface, $class, $options) = @_;
-
-    # check interface
-    throw Youri::Error::WrongClass("class $class doesn't implement $interface") 
-        unless $class->isa($interface);
 
     return $class->new($options ? %$options : ());
 };
@@ -45,14 +53,25 @@ fragment.
 
 =cut
 
-method create_from_configuration => positional (
-    { isa => 'MyClassName', required => 1 },
-    { isa => 'HashRef',     required => 1 },
-    { isa => 'HashRef',     required => 0 },
-) => sub {
+sub create_from_configuration { 
+    validate_pos(@_,
+        1,
+        {
+            type => SCALAR,
+            callbacks => {
+                'class name' => sub { eval { $_[0]->require() } }
+            }
+        },
+        {
+            type => HASHREF,
+            callbacks => {
+                'class key' => sub { exists $_[0]->{class} },
+            }
+        },
+        { type => HASHREF, optional => 1 }
+    );
     my ($self, $interface, $config, $options) = @_;
 
-    my $class   = $config->{class};
     my $all_options = {
         $config->{options} ? %{$config->{options}} : (),
         $options           ? %{$options}           : ()
